@@ -1,0 +1,7 @@
+*
+!*.S
+!*.sh
+!.vscode
+!*.md
+!*.json
+!.gitignore
