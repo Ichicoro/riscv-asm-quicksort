@@ -90,7 +90,9 @@ printarray:
 # lo -> a2
 # hi -> a3
 quicksort:
-    bge a2, a3, quicksort_exit # if (lo >= hi) we just return
+    # blt a3, a2, quicksort_exit # if (lo >= hi) we just return
+    bge a2, a3, quicksort_exit
+    
     
     # save in stack
     addi sp, sp, -32
@@ -116,12 +118,14 @@ quicksort:
 
     # recursively call quicksort on both subarrays
     mv a2, s10          # lo = lo
-    mv a3, s9           # hi = pivot
+    mv a3, s9           # hi = pivot (-1)
+    addi a3, a3, -1
     jal ra, quicksort
 
     # ebreak
 
-    mv a2, s9           # lo = pivot
+    mv a2, s9           # lo = pivot (+1)
+    addi a2, a2, 1      
     mv a3, s11          # hi = hi
     jal ra, quicksort
 
@@ -144,13 +148,11 @@ quicksort_exit:
 partition:
     beq a2, a3, partition_bail
 
-    # save ra in stack
+    # save in stack
     addi sp, sp, -24
     sd ra, 0(sp)
     sd s10, 8(sp)
     sd s11, 16(sp)
-
-    # used = t0, t1, t2, .., .., t5, t6
 
     mv t0, a3 # init pivot to a3 (hi)
 
@@ -159,7 +161,8 @@ partition:
     addi t5, a3, -1     # t5 = high-1
 
     partition_forloop:
-    bgt t6, t5, partition_forloop_end # if t6 > t5 then partition_forloop_end
+    ble t5, t6, partition_forloop_end # if t5 <= t6 then j partition_forloop_end
+    # bgt t6, t5, partition_forloop_end # if t6 > t5 then partition_forloop_end
         add s11, a1, t6         # s11 = *arr[j]  <---- interessante
         lb t1, 0(s11)           # t1 = *(s11)
         
@@ -173,12 +176,21 @@ partition:
         
         addi t6, t6, 1  # j++
     j partition_forloop
-    partition_forloop_end:    
+    partition_forloop_end:
+
     
     addi a0, t2, 1      # return i+1
     # ebreak
 
-    # load ra from stack
+    # swap(&arr[i+1], &arr[high])
+    add s10, a1, a0         # s10 = *arr[i+1]
+    add s11, a1, a3         # s11 = *arr[high]
+    lb t2, 0(s10)           # t2 = *s10
+    lb t3, 0(s11)           # t3 = *s11
+    sb t2, 0(s11)
+    sb t3, 0(s10)
+
+    # load from stack
     ld ra, 0(sp)
     ld s10, 8(sp)
     ld s11, 16(sp)
