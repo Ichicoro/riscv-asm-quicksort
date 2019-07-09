@@ -156,7 +156,7 @@ partition:
 
     addi t2, a2, -1     # (i) index of the smaller element => t2 = low - 1
     mv t6, a2           # t6 = j = low
-    addi t5, a3, 0     # t5 = high-1
+    addi t5, a3, -1     # t5 = high-1
 
     partition_forloop:
     bgt t6, t5, partition_forloop_end # if t6 > t5 then partition_forloop_end
