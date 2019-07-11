@@ -11,8 +11,8 @@
     whitespace: .string " "
 
 .section .data
-    str: .string ""
     testarray: .byte 5,1,3,7,8,10,6
+    str: .string ""
 
 .section .text
 _start:
@@ -23,6 +23,7 @@ _start:
     la a1, testarray
     addi a2, zero, 0
     lb a3, arrsize
+    addi a3, a3, -1
     jal ra, quicksort
 
     la a0, testarray
@@ -90,8 +91,8 @@ printarray:
 # lo -> a2
 # hi -> a3
 quicksort:
-    # blt a3, a2, quicksort_exit # if (lo >= hi) we just return
-    bge a2, a3, quicksort_exit
+    blt a3, a2, quicksort_exit # if (lo >= hi) we just return
+    # bge a2, a3, quicksort_exit
     
     
     # save in stack
@@ -120,9 +121,9 @@ quicksort:
     mv a2, s10          # lo = lo
     mv a3, s9           # hi = pivot (-1)
     addi a3, a3, -1
-    jal ra, quicksort
+    jal ra, quicksort   #quicksort(a1, lo, pivot-1)
 
-    # ebreak
+    #ebreak
 
     mv a2, s9           # lo = pivot (+1)
     addi a2, a2, 1      
@@ -146,7 +147,7 @@ quicksort_exit:
 # hi -> a3
 # pivot <- a0 (return value)
 partition:
-    beq a2, a3, partition_bail
+    # beq a2, a3, partition_bail
 
     # save in stack
     addi sp, sp, -24
@@ -154,24 +155,26 @@ partition:
     sd s10, 8(sp)
     sd s11, 16(sp)
 
-    mv t0, a3 # init pivot to a3 (hi)
+    add t0, a1, a3
+    lb t0, 0(t0)
+    # mv t0, a3 # init pivot to a3 (hi)
 
     addi t2, a2, -1     # (i) index of the smaller element => t2 = low - 1
     mv t6, a2           # t6 = j = low
     addi t5, a3, -1     # t5 = high-1
 
     partition_forloop:
-    ble t5, t6, partition_forloop_end # if t5 <= t6 then j partition_forloop_end
-    # bgt t6, t5, partition_forloop_end # if t6 > t5 then partition_forloop_end
+    # ble t5, t6, partition_forloop_end # if t5 <= t6 then j partition_forloop_end
+    bgt t6, t5, partition_forloop_end # if t6 > t5 then partition_forloop_end
         add s11, a1, t6         # s11 = *arr[j]  <---- interessante
-        lb t1, 0(s11)           # t1 = *(s11)
+        lb t1, 0(s11)           # t1 = *(arr[j])
         
-        bgt t1, t0, partition_forloop_inner_skip
+        bgt t1, t0, partition_forloop_inner_skip    # if t1>t0 skip (if arr[j]>pivot)
             addi t2, t2, 1      # i++
             add s10, a1, t2     # s10 = *arr[t2] = *arr[i]
-            lb t3, 0(s10)       # t3 = *(s10)
+            lb t3, 0(s10)       # t3 = *(arr[i])
             sb t3, 0(s11)       # arr[j] = t3
-            sb t1, 0(s10)       # arr
+            sb t1, 0(s10)       # arr[i] = t1
         partition_forloop_inner_skip:
         
         addi t6, t6, 1  # j++
