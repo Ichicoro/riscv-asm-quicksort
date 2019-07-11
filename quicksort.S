@@ -1,91 +1,3 @@
-.equ _SYS_EX, 93
-.equ _SYS_WR, 64
-
-.global _start
-
-.include "itoa.S"
-
-.section .rodata
-    num: .byte 12
-    arrsize: .byte 7
-    whitespace: .string " "
-
-.section .data
-    testarray: .byte 5,1,3,7,8,10,6
-    str: .string ""
-
-.section .text
-_start:
-    # la a0, testarray
-    # lb a1, arrsize
-    # jal ra, printarray
-
-    la a1, testarray
-    addi a2, zero, 0
-    lb a3, arrsize
-    addi a3, a3, -1
-    jal ra, quicksort
-
-    la a0, testarray
-    lb a1, arrsize
-    jal ra, printarray
-
-    # STOP EXECUTIONS
-    li a7, _SYS_EX
-	ecall
-
-
-# printarray(a0: array address, a1: array length)
-printarray: 
-    addi sp, sp, -48
-    sd ra, 0(sp)
-    sd s11, 8(sp)                   # -- push s11 in the stack!
-    sd s10, 16(sp)                  # -- push s10 in the stack!
-    sd s9, 24(sp)                   # -- push s9 in the stack!
-    sd s8, 32(sp)                   # -- push s8 in the stack!
-    sd s7, 40(sp)                   # -- push s7 in the stack!
-
-    mv s11, a0                      # s11 = *testarray
-    mv s10, a1                      # s10 = length(testarray)
-
-    add s7, s11, zero
-
-    printarray_loop:
-        add s7, s8, s11     # s7 = *s11+index = location of current number
-        
-        # use itoa on *s11+index to get an address with a printable string
-        lb a1, 0(s7)
-        la a0, str
-        jal ra, itoa
-
-        # print the number at *s11+index
-        mv a2, a0       # lunghezza della stringa
-        la a1, str      # stringa
-        li a0, 0
-        li a7, _SYS_WR 
-        ecall
-
-        # print out whitespace
-        addi a2, zero, 1
-        la a1, whitespace
-        li a0, 0
-        li a7, _SYS_WR
-        ecall
-
-        # increment the loop counter
-        addi s8, s8, 1
-    bne s10, s8, printarray_loop
-
-    ld ra, 0(sp)
-    ld s11, 8(sp)                   # -- pop back s11 from the stack
-    ld s10, 16(sp)                  # -- pop back s10 from the stack
-    ld s9, 24(sp)                   # -- pop back s9 from the stack
-    ld s8, 32(sp)                   # -- pop back s8 from the stack
-    ld s7, 40(sp)                   # -- pop back s7 from the stack
-    addi sp, sp, 48
-    ret
-
-
 # quicksort(*arr, lo, hi)
 # arr -> a1
 # lo -> a2
@@ -95,7 +7,7 @@ quicksort:
     # bge a2, a3, quicksort_exit
     
     
-    # save in stack
+    # save stuff in the stack
     addi sp, sp, -32
     sd ra, 0(sp)
     sd s10, 8(sp)       # s10 is going to hold lo
@@ -118,19 +30,17 @@ quicksort:
     # s11 = hi
 
     # recursively call quicksort on both subarrays
-    mv a2, s10          # lo = lo
     mv a3, s9           # hi = pivot (-1)
+    mv a2, s10          # lo = lo
     addi a3, a3, -1
     jal ra, quicksort   #quicksort(a1, lo, pivot-1)
 
-    #ebreak
-
     mv a2, s9           # lo = pivot (+1)
-    addi a2, a2, 1      
     mv a3, s11          # hi = hi
+    addi a2, a2, 1      
     jal ra, quicksort
 
-    # load from stack
+    # load stuff back from the stack
     ld ra, 0(sp)
     ld s10, 8(sp)
     ld s11, 16(sp)
@@ -149,22 +59,21 @@ quicksort_exit:
 partition:
     # beq a2, a3, partition_bail
 
-    # save in stack
+    # save stuff in the stack
     addi sp, sp, -24
     sd ra, 0(sp)
     sd s10, 8(sp)
     sd s11, 16(sp)
 
+    # init pivot to high (a3)
     add t0, a1, a3
     lb t0, 0(t0)
-    # mv t0, a3 # init pivot to a3 (hi)
 
     addi t2, a2, -1     # (i) index of the smaller element => t2 = low - 1
     mv t6, a2           # t6 = j = low
     addi t5, a3, -1     # t5 = high-1
 
     partition_forloop:
-    # ble t5, t6, partition_forloop_end # if t5 <= t6 then j partition_forloop_end
     bgt t6, t5, partition_forloop_end # if t6 > t5 then partition_forloop_end
         add s11, a1, t6         # s11 = *arr[j]  <---- interessante
         lb t1, 0(s11)           # t1 = *(arr[j])
@@ -193,7 +102,7 @@ partition:
     sb t2, 0(s11)
     sb t3, 0(s10)
 
-    # load from stack
+    # load stuff back from the stack
     ld ra, 0(sp)
     ld s10, 8(sp)
     ld s11, 16(sp)
