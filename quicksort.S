@@ -51,8 +51,6 @@ quicksort_exit:
 # hi -> a3
 # pivot <- a0 (return value)
 partition:
-    # beq a2, a3, partition_bail
-
     # save stuff in the stack
     addi sp, sp, -24
     sd ra, 0(sp)
