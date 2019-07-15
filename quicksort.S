@@ -3,7 +3,7 @@
 # lo -> a2
 # hi -> a3
 quicksort:
-    blt a3, a2, quicksort_exit      # if (lo >= hi) we just return
+    bltu a3, a2, quicksort_exit      # if (lo >= hi) we just return
     
     # save stuff in the stack
     addi sp, sp, -32
@@ -70,7 +70,7 @@ partition:
         add s11, a1, t6         # s11 = *arr[j]
         lbu t1, 0(s11)           # t1 = *(arr[j])
         
-        bgt t1, t0, partition_forloop_inner_skip    # if t1>t0 skip (if arr[j]>pivot)
+        bgtu t1, t0, partition_forloop_inner_skip    # if t1>t0 skip (if arr[j]>pivot)
             addi t2, t2, 1      # i++
             add s10, a1, t2     # s10 = *arr[t2] = *arr[i]
             lbu t3, 0(s10)       # t3 = *(arr[i])
