@@ -15,9 +15,9 @@
 
 .section .text
 _start:
-    la a1, testarray2
+    la a1, testarray
     li a2, 0
-    lbu a3, arrsize2
+    lbu a3, arrsize
     addi a3, a3, -1
     jal ra, quicksort
 
