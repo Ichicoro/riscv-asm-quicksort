@@ -3,7 +3,7 @@
 # lo -> a2
 # hi -> a3
 quicksort:
-    bltu a3, a2, quicksort_exit      # if (lo >= hi) we just return
+    blt a3, a2, quicksort_exit      # if (lo >= hi) we just return
     
     # save stuff in the stack
     addi sp, sp, -32
