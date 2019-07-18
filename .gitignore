@@ -1,6 +1,11 @@
 *
 !*.S
 !*.sh
+!presentation
+!presentation/*
+!presentation/*/*
+!presentation/*/*/*
+!presentation/*/*/*/*
 !.vscode
 !*.md
 !*.json
